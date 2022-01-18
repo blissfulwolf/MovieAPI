@@ -1,11 +1,13 @@
 const express = require('express');
-const movieDB = require("../model/movie")
-const genreDB = require('../model/genre')
-const userDB = require('../model/user')
+const morgan = require("morgan");
+const movieDB = require("../model/movie");
+const genreDB = require('../model/genre');
+const userDB = require('../model/user');
 
 var app = express();
 
 app.use(express.json());
+app.use(morgan('dev'));
 
 // Movie.js
 // Retrieve movies based on substring of movie name, sorted in ascending release date
