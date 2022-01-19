@@ -24,6 +24,19 @@ app.get("/movies/:search", (req,res)=>{
     })
 })
 
+
+
+// A1 == Retrieve all active screening movies
+app.get("/movies", (req,res)=>{
+    movieDB.getAllMovies((err,results)=>{
+        if(err){
+            res.status(500).send(err);
+        } else {
+            res.status(200).send(results);
+        }
+    })
+})
+
 // A1 ==  Add new movie
 app.post("/movies", (req,res)=>{
     var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
@@ -38,20 +51,23 @@ app.post("/movies", (req,res)=>{
 })
 
 
-// A1 == Retrieve all active screening movies
-app.get("/movies", (req,res)=>{
-    movieDB.getAllMovies((err,results)=>{
+// A2 ==  Update Movie
+app.put("/movies/:movieID", (req,res)=>{
+    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+    var movieID = req.params.movieID;
+
+    movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
+        
         if(err){
             res.status(500).send(err);
         } else {
-            res.status(200).send(results);
+            if(result.affectedRows > 0){
+                res.status(200).send({message:"Movie " + movieID + " updated." })
+            } else {
+                res.status(400).send({message:"Movie " + movieID + " not found." })
+            }
         }
     })
-})
-
-// A2 ==  Update Movie
-app.put("/movie", (req,res)=>{
-
 })
 
 
@@ -87,7 +103,7 @@ app.post("/genres", (req,res)=>{
 
 // A2 == Delete Genre
 app.delete("/genres", (req,res)=>{
-    
+
 })
 
 
