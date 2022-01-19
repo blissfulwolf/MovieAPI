@@ -5,3 +5,7 @@ node_modules/
 
 # dotenv environment variables file
 dbconfig.js
+
+# Sample Codes
+postman.json
+sqlQuery.js

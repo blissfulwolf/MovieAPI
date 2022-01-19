@@ -3,7 +3,7 @@ const db = require('./dbconfig');
 var movieDB = {};
 
 
-// Retrieve all active screening movies
+// A1 = Retrieve all active screening movies
 movieDB.getAllMovies = (callback)=>{
     var conn = db.getConnection();
 
@@ -20,9 +20,7 @@ movieDB.getAllMovies = (callback)=>{
     })
 }
 
-// Retrieve movies based on substring of movie name, sorted in ascending release date
-
-
+// A1 = Retrieve movies based on substring of movie name, sorted in ascending release date
 movieDB.searchMovies = (searchtitle, callback)=>{
     var conn = db.getConnection();
     console.log("moviejs_search => " + searchtitle);
@@ -46,7 +44,7 @@ movieDB.searchMovies = (searchtitle, callback)=>{
 }
 
 
-// Add new movie
+// A1 = Add new movie
 movieDB.addMovie = (name, description, release_date, image_url, genre_id, date_inserted, callback)=>{
         var conn = db.getConnection();
 
@@ -65,7 +63,7 @@ movieDB.addMovie = (name, description, release_date, image_url, genre_id, date_i
     }
 
 // A2 = Update movie
-movieDB.updateMovie = ()=>{
+movieDB.updateMovie = (customerID, name, description, release_date, image_url, genre_id, date_inserted, callback)=>{
     
 }
 

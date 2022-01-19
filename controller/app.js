@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Movie.js
-// Retrieve movies based on substring of movie name, sorted in ascending release date
+// A1 == Retrieve movies based on substring of movie name, sorted in ascending release date
 app.get("/movies/:search", (req,res)=>{
     var search = req.params.search;
 
@@ -24,7 +24,7 @@ app.get("/movies/:search", (req,res)=>{
     })
 })
 
-// Add new movie
+// A1 ==  Add new movie
 app.post("/movies", (req,res)=>{
     var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
 
@@ -38,7 +38,7 @@ app.post("/movies", (req,res)=>{
 })
 
 
-// Retrieve all active screening movies
+// A1 == Retrieve all active screening movies
 app.get("/movies", (req,res)=>{
     movieDB.getAllMovies((err,results)=>{
         if(err){
@@ -49,8 +49,17 @@ app.get("/movies", (req,res)=>{
     })
 })
 
+// A2 ==  Update Movie
+app.put("/movie", (req,res)=>{
+
+})
+
+
+
+
+// =================================================== // 
 // Genre.js
-// Retrieve all genre
+//  A1 == Retrieve all genre
 app.get("/genres", (req,res)=>{
     genreDB.getAllGenre((err,results)=>{
         if(err){
@@ -61,7 +70,7 @@ app.get("/genres", (req,res)=>{
     })
 })
 
-// Add new genre
+//  A1 == Add new genre
 app.post("/genres", (req,res)=>{
     var {genre_id, name} = req.body;
 
@@ -76,9 +85,15 @@ app.post("/genres", (req,res)=>{
 
 })
 
+// A2 == Delete Genre
+app.delete("/genres", (req,res)=>{
+    
+})
 
+
+// =================================================== // 
 // User.js
-// Verify admin’s credentials using email and password
+//  A1 == Verify admin’s credentials using email and password
 app.post("/admin", (req,res)=>{
     var {email, password} = req.body;
 
