@@ -10,18 +10,23 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // A2 = Delete Movie
-app.delete("movies/:movieID", (req,res)=>{
+app.delete("/movies/:movieID", (req,res)=>{
     var movieID = req.params.movieID;
-    console.log("params " + movieID);
+    // console.log("params " + movieID);
 
     movieDB.deleteMovie(movieID, (err, result)=>{
         if(err){
             res.status(500).send(err);
         } else {
-           res.status(200).send(result)
+            if(result.affectedRows > 0){
+                res.status(200).send({message:"Movie " + movieID + " deleted." })
+            } else {
+                res.status(404).send({message:"Movie " + movieID + " not found." })
+            }
         }
     })
 })
+
 
 // A2 ==  Update Movie
 app.put("/movies/:movieID", (req,res)=>{
