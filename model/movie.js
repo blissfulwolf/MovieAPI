@@ -80,7 +80,27 @@ movieDB.updateMovie = (movieID, name, description, release_date, image_url, genr
         })
 }
 
+// A2 = Delete movie
+movieDB.deleteMovie = (movieId, callback)=>{
+    
+    var conn = db.getConnection();
+    console.log("deleteMovie " + movieId)
+    
+    var sqlStmt = "DELETE FROM movie WHERE movie_id = ?";
+    // DELETE FROM `movieapi`.`movie` WHERE (`movie_id` = '8');
 
+    // var sqlStmt = "DELETE FROM `movieapi`.`movie` WHERE (`movie_id` = '8')";
+
+    conn.query(sqlStmt, [movieId], (err, result)=>{
+        conn.end;
+
+        if(err){
+            return callback(err, null);
+        } else {
+            return callback(null, result);
+        }
+    })
+}
 
 
 module.exports = movieDB;

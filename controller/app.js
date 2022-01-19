@@ -9,6 +9,44 @@ var app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
+// A2 = Delete Movie
+app.delete("movies/:movieID", (req,res)=>{
+    var movieID = req.params.movieID;
+    console.log("params " + movieID);
+
+    movieDB.deleteMovie(movieID, (err, result)=>{
+        if(err){
+            res.status(500).send(err);
+        } else {
+           res.status(200).send(result)
+        }
+    })
+})
+
+// A2 ==  Update Movie
+app.put("/movies/:movieID", (req,res)=>{
+    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+    var movieID = req.params.movieID;
+
+    movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
+        
+        if(err){
+            res.status(500).send(err);
+        } else {
+            if(result.affectedRows > 0){
+                res.status(200).send({message:"Movie " + movieID + " updated." })
+            } else {
+                res.status(404).send({message:"Movie " + movieID + " not found." })
+            }
+        }
+    })
+})
+
+
+
+
+
+
 // Movie.js
 // A1 == Retrieve movies based on substring of movie name, sorted in ascending release date
 app.get("/movies/:search", (req,res)=>{
@@ -50,25 +88,6 @@ app.post("/movies", (req,res)=>{
     })
 })
 
-
-// A2 ==  Update Movie
-app.put("/movies/:movieID", (req,res)=>{
-    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
-    var movieID = req.params.movieID;
-
-    movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
-        
-        if(err){
-            res.status(500).send(err);
-        } else {
-            if(result.affectedRows > 0){
-                res.status(200).send({message:"Movie " + movieID + " updated." })
-            } else {
-                res.status(400).send({message:"Movie " + movieID + " not found." })
-            }
-        }
-    })
-})
 
 
 
