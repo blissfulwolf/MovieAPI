@@ -56,15 +56,28 @@ movieDB.addMovie = (name, description, release_date, image_url, genre_id, date_i
             if(err){
                 return callback(err, null);
             } else {
-                return callback(null,result)
+                return callback(null,result);
             }
 
         })
     }
 
 // A2 = Update movie
-movieDB.updateMovie = (customerID, name, description, release_date, image_url, genre_id, date_inserted, callback)=>{
+movieDB.updateMovie = (movieID, name, description, release_date, image_url, genre_id, date_inserted, callback)=>{
+        var conn = db.getConnection();
+
+        var sqlStmt = "UPDATE `movieapi`.`movie` SET `name` = ? , `description` = ?, `release_date` = ? , `image_url` = ? , `genre_id` = ? , `date_inserted` = ?  WHERE (`movie_id` = ? )";
     
+
+        conn.query(sqlStmt, [name, description, release_date, image_url, genre_id, date_inserted, movieID], (err,result)=>{
+            conn.end();
+
+            if(err){
+                return callback(err,null);
+            } else {
+                return callback(null, result);
+            }
+        })
 }
 
 
