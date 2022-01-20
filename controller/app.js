@@ -4,10 +4,47 @@ const movieDB = require("../model/movie");
 const genreDB = require('../model/genre');
 const userDB = require('../model/user');
 
+const jwt = require('jsonwebtoken');
+const secretKey = '12345';
+
 var app = express();
 
 app.use(express.json());
 app.use(morgan('dev'));
+
+
+
+// User.js
+//  A1 == Verify admin’s credentials using email and password
+// JWT token
+app.post("/admin", (req,res)=>{
+    var {email, password, role } = req.body;
+    
+
+    userDB.login(email, password, (err,result)=>{
+        if(err){
+            res.status(500).send(err);
+        } else {
+            console.log(result);
+            if(result.length > 0){
+                var tokenPayload = {role:result[0].role};
+                var token = jwt.sign(tokenPayload, secretKey, {expiresIn:"1d"});
+                res.status(200).send({"token => ":token});
+            } else {
+                res.status(403).send({"message":"Wrong Username/Password"});
+            }
+        }
+    })
+})
+
+
+
+
+
+
+// =================================================== //
+
+
 
 // A2 = Delete Movie
 app.delete("/movies/:movieID", (req,res)=>{
@@ -50,8 +87,6 @@ app.put("/movies/:movieID", (req,res)=>{
 
 
 
-
-
 // Movie.js
 // A1 == Retrieve movies based on substring of movie name, sorted in ascending release date
 app.get("/movies/:search", (req,res)=>{
@@ -68,7 +103,6 @@ app.get("/movies/:search", (req,res)=>{
 })
 
 
-
 // A1 == Retrieve all active screening movies
 app.get("/movies", (req,res)=>{
     movieDB.getAllMovies((err,results)=>{
@@ -83,6 +117,8 @@ app.get("/movies", (req,res)=>{
 // A1 ==  Add new movie
 app.post("/movies", (req,res)=>{
     var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+    
+    console.log("Movie Added => " + req.body)
 
     movieDB.addMovie(name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
         if(err){
@@ -131,27 +167,6 @@ app.delete("/genres", (req,res)=>{
 })
 
 
-// =================================================== // 
-// User.js
-//  A1 == Verify admin’s credentials using email and password
-app.post("/admin", (req,res)=>{
-    var {email, password} = req.body;
-
-    userDB.login(email, password, (err,result)=>{
-        if(err){
-            res.status(500).send(err);
-        } else {
-            console.log(result)
-            console.log("login type " + typeof(result))
-            if(result.length == 0){
-                res.status(200).send({message:"Wrong Username/Password"});
-            } else {
-                res.status(200).send({message:"Login Successful. Welcome " + result[0].email})
-            }
-        }
-
-    })
-})
 
 
 
