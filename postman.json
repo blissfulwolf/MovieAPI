@@ -1,3 +1,8 @@
+{
+    "email": "happy@movie.com",
+    "password": "369"
+}
+
 
 {
     "movie_id": "5", 
@@ -15,7 +20,3 @@
     "name":"Romance"
 }
 
-{
-    "email": "happy@movie.com",
-    "password": "369"
-}
