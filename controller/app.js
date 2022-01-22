@@ -116,12 +116,6 @@ app.put("/movies/:movieID", verifyToken, (req,res)=>{
     } 
 })
 
-
-
-
-
-
-
 // A1 ==  Add new movie
 // A2 == Verifytoken
 app.post("/movies", verifyToken, (req,res)=>{
@@ -142,16 +136,6 @@ app.post("/movies", verifyToken, (req,res)=>{
         res.status(403).send({"message":"Unauthorized Access"})
     }
 })
-
-
-
-
-
-
-
-
-
-
 
 
 // A1 == Retrieve all active screening movies
@@ -213,8 +197,22 @@ app.post("/genres", (req,res)=>{
 })
 
 // A2 == Delete Genre
-app.delete("/genres", (req,res)=>{
+app.delete("/genres/:genreID", (req,res)=>{
 
+    var genreID = req.params.genreID;
+
+    genreDB.deleteGenre(genreID, (err, result)=>{
+        console.log(result);
+        if(err){
+            res.status(500).send(err);
+        } else {
+            if(result.affectedRows > 0){
+                res.status(200).send({message:"Genre " + genreID + " deleted" })
+            } else {
+                res.status(404).send({message: "Genre " + genreID + " not found"})
+            }
+        }
+    })
 })
 
 
