@@ -70,7 +70,7 @@ app.post("/admin", (req,res)=>{
 
 // =================================================== //
 
-
+// Movie.js
 
 // A2 = Delete Movie
 app.delete("/movies/:movieID", (req,res)=>{
@@ -112,14 +112,59 @@ app.put("/movies/:movieID", verifyToken, (req,res)=>{
             }
         })
     } else {
-        res.status(403).send({"message":"Unauthorised access "})
+        res.status(403).send({"message":"Unauthorized Access "})
     } 
 })
 
 
 
 
-// Movie.js
+
+
+
+// A1 ==  Add new movie
+// A2 == Verifytoken
+app.post("/movies", verifyToken, (req,res)=>{
+    
+    if(req.login.role == "admin"){
+        var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+    
+    console.log("Movie Added => " + req.body)
+
+        movieDB.addMovie(name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
+        if(err){
+            res.status(500).send(err);
+        } else {
+            res.status(200).send(result);
+        }
+    })
+    } else {
+        res.status(403).send({"message":"Unauthorized Access"})
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+// A1 == Retrieve all active screening movies
+app.get("/movies", (req,res)=>{
+    movieDB.getAllMovies((err,results)=>{
+        if(err){
+            res.status(500).send(err);
+        } else {
+            res.status(200).send(results);
+        }
+    })
+})
+
 // A1 == Retrieve movies based on substring of movie name, sorted in ascending release date
 app.get("/movies/:search", (req,res)=>{
     var search = req.params.search;
@@ -134,32 +179,6 @@ app.get("/movies/:search", (req,res)=>{
     })
 })
 
-
-// A1 == Retrieve all active screening movies
-app.get("/movies", (req,res)=>{
-    movieDB.getAllMovies((err,results)=>{
-        if(err){
-            res.status(500).send(err);
-        } else {
-            res.status(200).send(results);
-        }
-    })
-})
-
-// A1 ==  Add new movie
-app.post("/movies", (req,res)=>{
-    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
-    
-    console.log("Movie Added => " + req.body)
-
-    movieDB.addMovie(name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
-        if(err){
-            res.status(500).send(err);
-        } else {
-            res.status(200).send(result);
-        }
-    })
-})
 
 
 
