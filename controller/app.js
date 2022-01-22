@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require("path")
 const morgan = require("morgan");
 const movieDB = require("../model/movie");
 const genreDB = require('../model/genre');
@@ -11,15 +12,38 @@ var app = express();
 
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(express.static(path.resolve("./public")));
 
+
+// JWT Middleware
+// Token Bearer Authentication
+// Check Authentication Header Exist
+function verifyToken(req, res, next){
+    var token = req.header("authorization");
+
+    if(!token || !token.includes("Bearer ")){
+        res.status(403).send({"message":"Authorization token not found"});
+    } else {
+        // extract the token
+        token = token.split("Bearer ")[1];
+        // decode the token
+        jwt.verify(token, secretKey, (err,decoded)=>{
+            if(err){
+                res.status(500).send(err);
+            } else {
+                req.role = decoded;
+                next();
+            }
+        })
+    }
+}
 
 
 // User.js
 //  A1 == Verify admin’s credentials using email and password
 // JWT token
 app.post("/admin", (req,res)=>{
-    var {email, password, role } = req.body;
-    
+    var {email, password, role } = req.body;    
 
     userDB.login(email, password, (err,result)=>{
         if(err){
@@ -66,22 +90,28 @@ app.delete("/movies/:movieID", (req,res)=>{
 
 
 // A2 ==  Update Movie
-app.put("/movies/:movieID", (req,res)=>{
-    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
-    var movieID = req.params.movieID;
+// A2 == Verifytoken
+app.put("/movies/:movieID", verifyToken, (req,res)=>{
+ 
+    if(req.login.role == "admin"){        
+        var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+        var movieID = req.params.movieID;
 
-    movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
-        
-        if(err){
-            res.status(500).send(err);
-        } else {
-            if(result.affectedRows > 0){
-                res.status(200).send({message:"Movie " + movieID + " updated." })
+        movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
+            
+            if(err){
+                res.status(500).send(err);
             } else {
-                res.status(404).send({message:"Movie " + movieID + " not found." })
+                if(result.affectedRows > 0){
+                    res.status(200).send({message:"Movie " + movieID + " updated." })
+                } else {
+                    res.status(404).send({message:"Movie " + movieID + " not found." })
+                }
             }
-        }
-    })
+        })
+    } else {
+        res.status(403).send({"message":"Unauthorised access "})
+    } 
 })
 
 
