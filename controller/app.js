@@ -31,7 +31,9 @@ function verifyToken(req, res, next){
             if(err){
                 res.status(500).send(err);
             } else {
-                req.role = decoded;
+               
+                req.login = decoded;
+                console.log(req.login);
                 next();
             }
         })
@@ -92,7 +94,7 @@ app.delete("/movies/:movieID", (req,res)=>{
 // A2 ==  Update Movie
 // A2 == Verifytoken
 app.put("/movies/:movieID", verifyToken, (req,res)=>{
- 
+    console.log(req.role)
     if(req.login.role == "admin"){        
         var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
         var movieID = req.params.movieID;
