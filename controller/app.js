@@ -1,13 +1,76 @@
 const express = require('express');
+const path = require("path")
 const morgan = require("morgan");
 const movieDB = require("../model/movie");
 const genreDB = require('../model/genre');
 const userDB = require('../model/user');
 
+const jwt = require('jsonwebtoken');
+const secretKey = '12345';
+
 var app = express();
 
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(express.static(path.resolve("./public")));
+
+
+// JWT Middleware
+// Token Bearer Authentication
+// Check Authentication Header Exist
+function verifyToken(req, res, next){
+    var token = req.header("authorization");
+
+    if(!token || !token.includes("Bearer ")){
+        res.status(403).send({"message":"Authorization token not found"});
+    } else {
+        // extract the token
+        token = token.split("Bearer ")[1];
+        // decode the token
+        jwt.verify(token, secretKey, (err,decoded)=>{
+            if(err){
+                res.status(500).send(err);
+            } else {
+               
+                req.login = decoded;
+                console.log(req.login);
+                next();
+            }
+        })
+    }
+}
+
+
+// User.js
+//  A1 == Verify admin’s credentials using email and password
+// JWT token
+app.post("/admin", (req,res)=>{
+    var {email, password, role } = req.body;    
+
+    userDB.login(email, password, (err,result)=>{
+        if(err){
+            res.status(500).send(err);
+        } else {
+            console.log(result);
+            if(result.length > 0){
+                var tokenPayload = {role:result[0].role};
+                var token = jwt.sign(tokenPayload, secretKey, {expiresIn:"1d"});
+                res.status(200).send({"token => ":token});
+            } else {
+                res.status(403).send({"message":"Wrong Username/Password"});
+            }
+        }
+    })
+})
+
+
+
+
+
+
+// =================================================== //
+
+// Movie.js
 
 // A2 = Delete Movie
 app.delete("/movies/:movieID", (req,res)=>{
@@ -29,22 +92,28 @@ app.delete("/movies/:movieID", (req,res)=>{
 
 
 // A2 ==  Update Movie
-app.put("/movies/:movieID", (req,res)=>{
-    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
-    var movieID = req.params.movieID;
+// A2 == Verifytoken
+app.put("/movies/:movieID", verifyToken, (req,res)=>{
+    console.log(req.role)
+    if(req.login.role == "admin"){        
+        var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+        var movieID = req.params.movieID;
 
-    movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
-        
-        if(err){
-            res.status(500).send(err);
-        } else {
-            if(result.affectedRows > 0){
-                res.status(200).send({message:"Movie " + movieID + " updated." })
+        movieDB.updateMovie(movieID,name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
+            
+            if(err){
+                res.status(500).send(err);
             } else {
-                res.status(404).send({message:"Movie " + movieID + " not found." })
+                if(result.affectedRows > 0){
+                    res.status(200).send({message:"Movie " + movieID + " updated." })
+                } else {
+                    res.status(404).send({message:"Movie " + movieID + " not found." })
+                }
             }
-        }
-    })
+        })
+    } else {
+        res.status(403).send({"message":"Unauthorized Access "})
+    } 
 })
 
 
@@ -52,20 +121,36 @@ app.put("/movies/:movieID", (req,res)=>{
 
 
 
-// Movie.js
-// A1 == Retrieve movies based on substring of movie name, sorted in ascending release date
-app.get("/movies/:search", (req,res)=>{
-    var search = req.params.search;
 
+// A1 ==  Add new movie
+// A2 == Verifytoken
+app.post("/movies", verifyToken, (req,res)=>{
+    
+    if(req.login.role == "admin"){
+        var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+    
+    console.log("Movie Added => " + req.body)
 
-    movieDB.searchMovies(search, (err, result)=>{
+        movieDB.addMovie(name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
         if(err){
             res.status(500).send(err);
         } else {
             res.status(200).send(result);
         }
     })
+    } else {
+        res.status(403).send({"message":"Unauthorized Access"})
+    }
 })
+
+
+
+
+
+
+
+
+
 
 
 
@@ -80,11 +165,12 @@ app.get("/movies", (req,res)=>{
     })
 })
 
-// A1 ==  Add new movie
-app.post("/movies", (req,res)=>{
-    var {name, description, release_date, image_url, genre_id, date_inserted} = req.body;
+// A1 == Retrieve movies based on substring of movie name, sorted in ascending release date
+app.get("/movies/:search", (req,res)=>{
+    var search = req.params.search;
 
-    movieDB.addMovie(name, description, release_date, image_url, genre_id, date_inserted, (err, result)=>{
+
+    movieDB.searchMovies(search, (err, result)=>{
         if(err){
             res.status(500).send(err);
         } else {
@@ -92,6 +178,7 @@ app.post("/movies", (req,res)=>{
         }
     })
 })
+
 
 
 
@@ -131,27 +218,6 @@ app.delete("/genres", (req,res)=>{
 })
 
 
-// =================================================== // 
-// User.js
-//  A1 == Verify admin’s credentials using email and password
-app.post("/admin", (req,res)=>{
-    var {email, password} = req.body;
-
-    userDB.login(email, password, (err,result)=>{
-        if(err){
-            res.status(500).send(err);
-        } else {
-            console.log(result)
-            console.log("login type " + typeof(result))
-            if(result.length == 0){
-                res.status(200).send({message:"Wrong Username/Password"});
-            } else {
-                res.status(200).send({message:"Login Successful. Welcome " + result[0].email})
-            }
-        }
-
-    })
-})
 
 
 
