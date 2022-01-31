@@ -216,12 +216,4 @@ app.delete("/genres/:genreID", (req,res)=>{
 })
 
 
-
-
-
-
-
-
-
-
 module.exports = app;
