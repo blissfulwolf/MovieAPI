@@ -42,8 +42,21 @@ genreDB.addGenre = (genre_id, name, callback)=>{
 }
 
 // A2 = Delete genre
-genreDB.deleteGenre = ()=>{
+genreDB.deleteGenre = (genre_id, callback)=>{
 
+        var conn = db.getConnection();
+
+        var sqlStmt = "DELETE FROM `movieapi`.`genre` WHERE (`genre_id` = ?)"
+
+        conn.query(sqlStmt, [genre_id], (err, result)=>{
+            conn.end;
+
+            if(err){
+                return callback(err, null);
+            } else {
+                return callback(null, result);
+            }
+        })
 }
 
 
