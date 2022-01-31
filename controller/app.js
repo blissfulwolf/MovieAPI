@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require("path")
 const morgan = require("morgan");
+const cors = require("cors");
+
 const movieDB = require("../model/movie");
 const genreDB = require('../model/genre');
 const userDB = require('../model/user');
@@ -8,8 +10,11 @@ const userDB = require('../model/user');
 const jwt = require('jsonwebtoken');
 const secretKey = '12345';
 
+
 var app = express();
 
+// middleware
+app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(express.static(path.resolve("./public")));
