@@ -133,7 +133,7 @@ app.post("/movies", verifyToken, (req,res)=>{
         }
     })
     } else {
-        res.status(403).send({"message":"Unauthorized Access"})
+        res.status(403).send({"message":"Unauthorized Access"});
     }
 })
 
@@ -153,7 +153,6 @@ app.get("/movies", (req,res)=>{
 app.get("/movies/:search", (req,res)=>{
     var search = req.params.search;
 
-
     movieDB.searchMovies(search, (err, result)=>{
         if(err){
             res.status(500).send(err);
@@ -172,47 +171,59 @@ app.get("/movies/:search", (req,res)=>{
 // Genre.js
 //  A1 == Retrieve all genre
 app.get("/genres", (req,res)=>{
+
     genreDB.getAllGenre((err,results)=>{
         if(err){
             res.status(500).send(err);
         } else {
             res.status(200).send(results)
         }
-    })
+    })    
 })
 
 //  A1 == Add new genre
-app.post("/genres", (req,res)=>{
+// A2 == Verifytoken
+app.post("/genres", verifyToken, (req,res)=>{
     var {genre_id, name} = req.body;
 
-    genreDB.addGenre(genre_id, name, (err,result)=>{
-        if(err){
-            res.status(500).send(err);
-        } else {
-            res.status(200).send(result);
-        }
-    })
-
-
+    if(req.login.role == "admin") {
+        genreDB.addGenre(genre_id, name, (err,result)=>{
+            if(err){
+                res.status(500).send(err);
+            } else {
+                res.status(200).send(result);
+            }
+        })
+    } else {
+        res.status(403).send({"message":"Unauthorized Access"});
+    }
 })
 
+
+
 // A2 == Delete Genre
-app.delete("/genres/:genreID", (req,res)=>{
+// A2 == Verifytoken
+app.delete("/genres/:genreID", verifyToken, (req,res)=>{
 
     var genreID = req.params.genreID;
 
-    genreDB.deleteGenre(genreID, (err, result)=>{
-        console.log(result);
-        if(err){
-            res.status(500).send(err);
-        } else {
-            if(result.affectedRows > 0){
-                res.status(200).send({message:"Genre " + genreID + " deleted" })
+    if(req.login.role == "admin") {
+        genreDB.deleteGenre(genreID, (err, result)=>{
+            console.log(result);
+            if(err){
+                res.status(500).send(err);
             } else {
-                res.status(404).send({message: "Genre " + genreID + " not found"})
+                if(result.affectedRows > 0){
+                    res.status(200).send({message:"Genre " + genreID + " deleted" })
+                } else {
+                    res.status(404).send({message: "Genre " + genreID + " not found"})
+                }
             }
-        }
-    })
+        })
+       
+    } else {
+        res.status(403).send({"message":"Unauthorized Access"});
+    }      
 })
 
 
